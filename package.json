@@ -45,8 +45,17 @@
   },
   "dependencies": {
     "baconjs": "^0.7.53",
+    "cheerio-httpcli": "^0.3.2",
+    "es6-promise": "^2.3.0",
     "immutable": "^3.6.4",
+    "isomorphic-fetch": "^2.1.0",
     "jquery": "^2.1.1",
-    "react": "^0.13.1"
+    "jsx-loader": "^0.13.2",
+    "lodash": "^3.9.3",
+    "material-ui": "^0.9.1",
+    "node-libs-browser": "^0.5.2",
+    "react": "^0.13.1",
+    "react-tap-event-plugin": "^0.1.7",
+    "webpack": "^1.9.11"
   }
 }

@@ -1,7 +1,9 @@
-var React = require('react');
-var App = require('./App.jsx');
-var Context = require('./Context.js');
+var React = require('react/addons');
+var SpotContext = require('./contexts/spot-context');
+var Bacon = require('baconjs');
+var StationList = require('./components/station-list');
 
-React.render(React.createElement(App, {
-  context: Context.create()
-}), document.getElementById('threes'));
+
+React.render(React.createElement(StationList, {
+  context: SpotContext()
+}), document.getElementById('spotapp'));

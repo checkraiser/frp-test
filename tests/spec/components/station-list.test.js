@@ -3,8 +3,8 @@
 var expect = require('chai').expect;
 var React = require('react/addons');
 var TestUtils = React.addons.TestUtils;
-var Context = require('../../../src/Context.js');
-var Board = require('../../../src/components/Board.jsx');
+var Context = require('../../../src/contexts/spot-context');
+var Board = require('../../../src/components/station-list');
 
 
 describe('Board Component', function() {
