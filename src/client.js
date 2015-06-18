@@ -1,9 +1,9 @@
+
+
 var React = require('react/addons');
-var SpotContext = require('./contexts/spot-context');
-var Bacon = require('baconjs');
-var StationList = require('./components/station-list');
+var TodoActions = require('./actions/todo-actions');
+var TodoStore = require('./stores/todo-store')(TodoActions);
+var List = require('./components/list.react');
 
+React.render(<List store={TodoStore} actions={TodoActions} />, document.getElementById('spotapp'));
 
-React.render(React.createElement(StationList, {
-  context: SpotContext()
-}), document.getElementById('spotapp'));
