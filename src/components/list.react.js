@@ -2,7 +2,7 @@
 
 var React = require('react');
 var Item = require('./item.react');
-
+var AddItemComponent = require('./add-item-component.react')
 var List = React.createClass({
 	getInitialState: function()  {
 		return {items: [], newItemText: ''}
@@ -17,6 +17,8 @@ var List = React.createClass({
 	render: function() {
 		var items = this.state.items.map(item => <Item item={item} actions={this.props.actions} key={item.id} />);
 		return <div>{items}
+				<br/>
+				<AddItemComponent actions={this.props.actions} />
 			</div>
 	}
 });

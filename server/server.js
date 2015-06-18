@@ -6,11 +6,10 @@ let server = new Hapi.Server();
 
 server.connection({port: 3000});
 
-var todos = Immutable.List.of(
+var todos = Immutable.List([
 			{id: 1, text: 'todo 1'},
 			{id: 2, text: 'todo 2'}
-		);
-var createTodo = (todo) => todos.push(todo);
+		]);
 
 server.route({
 	path: '/todos',
@@ -40,14 +39,27 @@ server.route({
 });
 
 server.route({
+	path: '/todos/{id}',
+	method: 'DELETE',
+	handler: function(req, rep){
+		todos = todos.delete(
+			todos.findIndex(
+				(item) => item.id === req.params.id
+			)
+		)
+		rep(todos)
+	}
+})
+
+server.route({
 	path: '/todos',
 	method: 'POST',
 	handler: function(request, reply){
 		var todo = {
 			id: uuid.v1(),
-			text: requset.payload.text
+			text: request.payload.text
 		}
-		createTodo(todo);
+		todos = todos.push(todo);
 		reply(todos);
 	}
 })

@@ -7,45 +7,71 @@ var Immutable = require('immutable');
 
 es6.polyfill();
 
-var createItem = function(text) {
-	return {
-		id: uuid.v1(),
-		text: text
-	}
-}
+
 
 module.exports = function(actions) {
-	var addItem = actions.addItem.map(createItem).flatMap(
+	var addItem = actions.addItem.flatMap(
 			(item) =>
 				Bacon.fromPromise(
-					fetch('/todos', 
+					fetch('/todos',
 					{
 						method: 'post',
-						body: item
-					})
-				)
-		).map(
-				 response => response.status === 200 ? response.json() : new Bacon.Error(response.statusText)
-			  )
-		.log()
-
-	var getItems = actions.getItems.flatMap(
-			() => 
-				Bacon.fromPromise(
-					fetch(
-							'/todos'
-						 ).
-					then(
-							(response) => response.json()
+						headers: {
+					    'Accept': 'application/json',
+					    'Content-Type': 'application/json'
+					  },
+						body: JSON.stringify(
+							{text: item}
 						)
+					}).
+					then(
+						(response) => response.json()
+					)
 				).map(
 					(json) => json
 				)
 		)
+		.log()
+
+	var getItems = actions.getItems.flatMap(
+			() =>
+				Bacon.fromPromise(
+					fetch(
+						'/todos'
+					).
+					then(
+						(response) => response.json()
+					)
+				).map(
+					(json) => json
+				)
+		)
+
+	var removeItem = actions.removeItem.flatMap(
+		(item_id) =>
+				Bacon.fromPromise(
+					fetch(
+						  '/todos/' + item_id,
+						  {
+						  	method: 'DELETE',
+						  	headers: {
+						  		'Accept': 'application/json',
+					    		'Content-Type': 'application/json'
+						  	}
+						  }
+					).
+					then(
+						(response) => response.json()
+					)
+				).map(
+					(json) => json
+				)
+	)
 	var updatedTodoItems = Bacon.update(
 		Immutable.List(),
-		getItems, (oldList, items) => {console.log(items); return items},
-		addItem, (oldList, newItem) => oldList.concat(newItem)
+		getItems, (oldList, items) => items,
+		addItem, (oldList, items) => items,
+		removeItem, (oldList, items) => items
 	)
 	return {
 		items: updatedTodoItems

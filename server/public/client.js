@@ -26011,50 +26011,77 @@
 
 	es6.polyfill();
 
-	var createItem = function(text) {
-		return {
-			id: uuid.v1(),
-			text: text
-		}
-	}
+
 
 	module.exports = function(actions) {
-		var addItem = actions.addItem.map(createItem).flatMap(
+		var addItem = actions.addItem.flatMap(
 				function(item) 
 					{return Bacon.fromPromise(
-						fetch('/todos', 
+						fetch('/todos',
 						{
 							method: 'post',
-							body: item
-						})
-					);}
-			).map(
-					 function(response)  {return response.status === 200 ? response.json() : new Bacon.Error(response.statusText);}
-				  )
-			.log()
-
-		var getItems = actions.getItems.flatMap(
-				function()  
-					{return Bacon.fromPromise(
-						fetch(
-								'/todos'
-							 ).
-						then(
-								function(response)  {return response.json();}
+							headers: {
+						    'Accept': 'application/json',
+						    'Content-Type': 'application/json'
+						  },
+							body: JSON.stringify(
+								{text: item}
 							)
+						}).
+						then(
+							function(response)  {return response.json();}
+						)
 					).map(
 						function(json)  {return json;}
 					);}
 			)
+			.log()
+
+		var getItems = actions.getItems.flatMap(
+				function() 
+					{return Bacon.fromPromise(
+						fetch(
+							'/todos'
+						).
+						then(
+							function(response)  {return response.json();}
+						)
+					).map(
+						function(json)  {return json;}
+					);}
+			)
+
+		var removeItem = actions.removeItem.flatMap(
+			function(item_id) 
+					{return Bacon.fromPromise(
+						fetch(
+							  '/todos/' + item_id,
+							  {
+							  	method: 'DELETE',
+							  	headers: {
+							  		'Accept': 'application/json',
+						    		'Content-Type': 'application/json'
+							  	}
+							  }
+						).
+						then(
+							function(response)  {return response.json();}
+						)
+					).map(
+						function(json)  {return json;}
+					);}
+		)
 		var updatedTodoItems = Bacon.update(
 			Immutable.List(),
-			getItems, function(oldList, items)  {console.log(items); return items},
-			addItem, function(oldList, newItem)  {return oldList.concat(newItem);}
+			getItems, function(oldList, items)  {return items;},
+			addItem, function(oldList, items)  {return items;},
+			removeItem, function(oldList, items)  {return items;}
 		)
 		return {
 			items: updatedTodoItems
 		}
 	}
+
 
 /***/ },
 /* 180 */
@@ -32642,7 +32669,7 @@
 
 	var React = __webpack_require__(189);
 	var Item = __webpack_require__(190);
-
+	var AddItemComponent = __webpack_require__(191)
 	var List = React.createClass({displayName: "List",
 		getInitialState: function()  {
 			return {items: [], newItemText: ''}
@@ -32656,12 +32683,15 @@
 		},
 		render: function() {
 			var items = this.state.items.map(function(item)  {return React.createElement(Item, {item: item, actions: this.props.actions, key: item.id});}.bind(this));
-			return React.createElement("div", null, items
+			return React.createElement("div", null, items, 
+					React.createElement("br", null), 
+					React.createElement(AddItemComponent, {actions: this.props.actions})
 				)
 		}
 	});
 
 	module.exports = List;
+
 
 /***/ },
 /* 189 */
@@ -32681,15 +32711,39 @@
 		render: function() {
 			return (
 				React.createElement("div", null, this.props.item.text, React.createElement("br", null), 
-				React.createElement("button", {onClick: function()  {return this._onRemove;}.bind(this)}, "Remove"))
+				React.createElement("button", {onClick: function()  {return this.props.actions.removeItem.push(this.props.item.id);}.bind(this)}, "Remove"))
 			)
-		},
-		_onRemove: function() {
-			this.props.actions.removeItem.push(this.props.item.id);
 		}
 	});
 
 	module.exports = Item;
+
+
+/***/ },
+/* 191 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/** @jsx React.DOM */
+
+	var React = __webpack_require__(189);
+
+	var AddItemComponent = React.createClass({displayName: "AddItemComponent",
+	  getInitialState: function()  {
+	    return { newItemText: ''}
+	  },
+
+	  render: function() {
+	    return (
+	      React.createElement("div", null, 
+	        React.createElement("input", {type: "text", onChange: function(e)  {return this.setState({newItemText: e.target.value});}.bind(this), value: this.state.newItemText}), 
+	        React.createElement("button", {onClick: function()  {return this.props.actions.addItem.push(this.state.newItemText);}.bind(this)}, "Add item")
+	      )
+	    )
+	  }
+	});
+
+	module.exports = AddItemComponent;
+
 
 /***/ }
 /******/ ]);
